@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import model.Blog;
-
-
+import model.User;
+import utility.CheckBlogPost;
 
 
 @WebServlet(urlPatterns= {"/blog"})
@@ -22,8 +22,6 @@ public class BlogController extends HttpServlet {
 
     public BlogController() {
         super();
-        // TODO Auto-generated constructor stub
-    	
     }
 
 
@@ -35,16 +33,40 @@ public class BlogController extends HttpServlet {
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String blogDetails = request.getParameter("selectedAnswers");
+		String blogDetails = request.getParameter("selectedAnswers")	;
+		System.out.println(blogDetails);
+		String[] userBlog=blogDetails.split(",");
+		String title = userBlog[0];
+		String description = userBlog[1];
+		LocalDate postedOn = LocalDate.now();
 		
-		if(blogDetails!=null) {
-			Blog  b=new Blog("A blog on Java","This sample blog explains about Java basics", null);
-			request.setAttribute("blog", b.getTitle());
-			request.setAttribute("user",b.getDescription());
+		User user = null;
+		Blog blog=new Blog(title,description,postedOn);
+		System.out.println(title);
+		System.out.println(description);
+		
+		blog.setBlogTitle(title);
+		blog.setBlogDescription(description);
+		blog.setDate(postedOn);
+		CheckBlogPost blog1 = new CheckBlogPost(); // blog1 is a checkBlogPost
+		boolean checkblog=blog1.checkBlog(blog);//these two lines i have written thas all
+
+		if(checkblog) {
+			request.setAttribute("blog", blog); // Here it was blog1 instead of blog i guess This is a model class which we pass over here
+			request.setAttribute("user",user);
 			RequestDispatcher rd=this.getServletContext().getRequestDispatcher("/WEB-INF/views/blogView.jsp");
 			rd.forward(request, response);
 		}
-	
+		else{
+			
+			request.setAttribute("error", "Your blog cannot be added as it contains offensive words, Please check your blog");
+
+			RequestDispatcher rd=this.getServletContext().getRequestDispatcher("/WEB-INF/views/blogView.jsp");
+			rd.forward(request, response);
+			
+			
+		}
+		
 	}
 
 }
